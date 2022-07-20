@@ -17,7 +17,7 @@ runs:
          GAP="gap -q -A -l /tmp/gaproot; --quitonbreak -q"
          
          # generate library coverage reports
-         cat > __COVERAGE__.g <<EOF
+         $GAP <<GAPInput
          
          if LoadPackage( "profiling" ) <> true then
              Print( "ERROR: could not load profiling package" );
@@ -41,9 +41,7 @@ runs:
          Print( "Outputting JSON\n" );
          OutputJsonCoverage( r, "gap-coverage.json" );;
          QUIT_GAP(0);
-         EOF
-         
-         $GAP __COVERAGE__.g
+         GAPInput
          
          # generate source coverage reports by running gcov
          find . -type f -name '*.gcno' -exec gcov -pb {} +
