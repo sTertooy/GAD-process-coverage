@@ -1,0 +1,51 @@
+name: 'Process coverage data'
+description: 'Process coverage data'
+
+runs:
+  using: "composite"
+  steps:
+      - name: "Process coverage data"
+        run: |
+         set -ex
+         
+         GAPROOT=/opt/gap
+         
+         mkdir -p /tmp/gaproot/pkg/
+         ln -f -s $PWD /tmp/gaproot/pkg/
+         
+         # start GAP with custom GAP root, to ensure correct package version is loaded
+         GAP="gap -q -A -l /tmp/gaproot; --quitonbreak -q"
+         
+         # generate library coverage reports
+         cat > __COVERAGE__.g <<EOF
+         
+         if LoadPackage( "profiling" ) <> true then
+             Print( "ERROR: could not load profiling package" );
+             FORCE_QUIT_GAP( 1 );
+         fi;
+         
+         d := Directory( "${COVDIR-coverage}" );;
+         covs := [];;
+         
+         for f in DirectoryContents( d ) do
+             if f in [ ".", ".." ] then
+                 continue;
+             fi;
+             Add( covs, Filename( d, f) );
+         od;
+         Print( "Merging coverage results from ", covs, "\n" );
+         r := MergeLineByLineProfiles( covs );;
+         
+         # filtered out unwanted other packages to avoid bad coverage interaction
+         r.line_info := Filtered( r.line_info, x -> not StartsWith( x[1], "$GAPROOT/" ) );;
+         Print( "Outputting JSON\n" );
+         OutputJsonCoverage( r, "gap-coverage.json" );;
+         QUIT_GAP(0);
+         EOF
+         
+         $GAP __COVERAGE__.g
+         
+         # generate source coverage reports by running gcov
+         find . -type f -name '*.gcno' -exec gcov -pb {} +
+         
+        shell: bash
