@@ -1,10 +1,11 @@
-name: 'Process coverage data'
-description: 'Process coverage data'
+name: "Process coverage data"
+description: "Process coverage data from testing the GAP package"
 
 runs:
   using: "composite"
   steps:
       - name: "Process coverage data"
+        shell: bash
         run: |
          set -ex
          
@@ -13,10 +14,10 @@ runs:
          mkdir -p /tmp/gaproot/pkg/
          ln -f -s $PWD /tmp/gaproot/pkg/
          
-         # start GAP with custom GAP root, to ensure correct package version is loaded
+         # Start GAP with custom GAP root, to ensure correct package version is loaded
          GAP="gap -q -A -l /tmp/gaproot; --quitonbreak -q"
          
-         # generate library coverage reports
+         # Generate library coverage reports
          $GAP <<GAPInput
          
          if LoadPackage( "profiling" ) <> true then
@@ -36,14 +37,12 @@ runs:
          Print( "Merging coverage results from ", covs, "\n" );
          r := MergeLineByLineProfiles( covs );;
          
-         # filtered out unwanted other packages to avoid bad coverage interaction
+         # Filtered out unwanted other packages to avoid bad coverage interaction
          r.line_info := Filtered( r.line_info, x -> not StartsWith( x[1], "$GAPROOT/" ) );;
          Print( "Outputting JSON\n" );
          OutputJsonCoverage( r, "gap-coverage.json" );;
          QUIT_GAP(0);
          GAPInput
          
-         # generate source coverage reports by running gcov
-         find . -type f -name '*.gcno' -exec gcov -pb {} +
-         
-        shell: bash
+         # Generate source coverage reports by running gcov
+         find . -type f -name "*.gcno" -exec gcov -pb {} +
