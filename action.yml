@@ -1,19 +1,13 @@
 name: "Process coverage data"
 description: "Process coverage data from testing the GAP package"
-defaults:
-  run:
-    shell: bash
     
 runs:
   using: "composite"
   steps:
   
     - name: "Process coverage data"
+      shell: bash
       run: |
-        set -ex
-        
-        GAPROOT=/opt/gap
-         
         set -ex
        
         # Add package to the custom GAP root
@@ -43,7 +37,7 @@ runs:
         r := MergeLineByLineProfiles( covs );;
         
         # Filtered out unwanted other packages to avoid bad coverage interaction
-        r.line_info := Filtered( r.line_info, x -> not StartsWith( x[1], "$GAPROOT/" ) );;
+        r.line_info := Filtered( r.line_info, x -> not StartsWith( x[1], "/opt/gap/" ) );;
         Print( "Outputting JSON\n" );
         OutputJsonCoverage( r, "gap-coverage.json" );;
         QUIT_GAP(0);
