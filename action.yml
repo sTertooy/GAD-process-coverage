@@ -11,7 +11,7 @@ runs:
         set -ex
        
         # Add package to the custom GAP root
-        ln -f -s $PWD /tmp/gaproot/pkg/
+        ln -f -s $PWD $GAP_ROOT/pkg/
          
         # Add extra flags
         GAP="gap -q -A"
@@ -37,7 +37,7 @@ runs:
         r := MergeLineByLineProfiles( covs );;
         
         # Filtered out unwanted other packages to avoid bad coverage interaction
-        r.line_info := Filtered( r.line_info, x -> not StartsWith( x[1], "/opt/gap/" ) );;
+        r.line_info := Filtered( r.line_info, x -> not StartsWith( x[1], "$GAP_HOME/" ) );;
         Print( "Outputting JSON\n" );
         OutputJsonCoverage( r, "gap-coverage.json" );;
         QUIT_GAP(0);
